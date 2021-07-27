@@ -298,6 +298,8 @@ def train_loop(epoch, model, loader, optimizer, n_classes, writer = None, loss_f
 
     print('\n')
     for batch_idx, (data, label) in enumerate(loader):
+        data[data == float("Inf")] = 1
+        data[data > 1] = 1
         data, label = data.to(device), label.to(device)
 
         logits, Y_prob, Y_hat, _, _ = model(data)
@@ -411,6 +413,10 @@ def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, w
     sample_size = model.k_sample
     with torch.no_grad():
         for batch_idx, (data, label) in enumerate(loader):
+            data_np = data.numpy()
+            #test_line_ = 0
+            data[data == float("Inf")] = 1
+            data[data > 1] = 1
             data, label = data.to(device), label.to(device)      
             logits, Y_prob, Y_hat, _, instance_dict = model(data, label=label, instance_eval=True)
             acc_logger.log(Y_hat, label)

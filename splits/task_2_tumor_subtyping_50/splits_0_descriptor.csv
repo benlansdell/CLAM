@@ -1,4 +1,4 @@
 ,train,val,test
-subtype_1,101,26,24
-subtype_2,57,14,16
-subtype_3,40,10,10
+A_,6,2,2
+E_,11,3,3
+S_,4,1,1

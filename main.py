@@ -164,12 +164,12 @@ if args.task == 'task_1_tumor_vs_normal':
 
 elif args.task == 'task_2_tumor_subtyping':
     args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'dataset_csv/tumor_subtyping_dummy_clean.csv',
-                            data_dir= os.path.join(args.data_root_dir, 'tumor_subtyping_resnet_features'),
+    dataset = Generic_MIL_Dataset(csv_path = 'cometFilteredSubset.csv',
+                            data_dir= os.path.join(args.data_root_dir, '/mnt/storage/COMET/preprocessed/features/'),
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,
-                            label_dict = {'subtype_1':0, 'subtype_2':1, 'subtype_3':2},
+                            label_dict = {'A_':0, 'E_':1, 'S_':2},
                             patient_strat= False,
                             ignore=[])
 

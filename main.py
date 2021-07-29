@@ -20,7 +20,6 @@ import torch.nn.functional as F
 import pandas as pd
 import numpy as np
 
-
 def main(args):
     # create results directory if necessary
     if not os.path.isdir(args.results_dir):
@@ -164,8 +163,8 @@ if args.task == 'task_1_tumor_vs_normal':
 
 elif args.task == 'task_2_tumor_subtyping':
     args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'cometFilteredSubset.csv',
-                            data_dir= os.path.join(args.data_root_dir, '/mnt/storage/COMET/preprocessed/features/'),
+    dataset = Generic_MIL_Dataset(csv_path = 'cometFiltered.csv',
+                            data_dir= '/mnt/storage/COMET/preprocessed_test1024_fp/features/',
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,

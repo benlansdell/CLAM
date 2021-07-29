@@ -173,7 +173,7 @@ def train(datasets, cur, args):
 
     print('\nSetup EarlyStopping...', end=' ')
     if args.early_stopping:
-        early_stopping = EarlyStopping(patience = 20, stop_epoch=50, verbose = True)
+        early_stopping = EarlyStopping(patience = 20, stop_epoch=30, verbose = True)
 
     else:
         early_stopping = None

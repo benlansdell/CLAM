@@ -49,6 +49,8 @@ device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 args.save_dir = os.path.join('./eval_results', 'EVAL_' + str(args.save_exp_code))
 args.models_dir = os.path.join(args.results_dir, str(args.models_exp_code))
 
+print(args.models_dir)
+
 os.makedirs(args.save_dir, exist_ok=True)
 
 if args.splits_dir is None:
@@ -80,13 +82,14 @@ if args.task == 'task_1_tumor_vs_normal':
                             patient_strat=False,
                             ignore=[])
 
+#Have to update this...
 elif args.task == 'task_2_tumor_subtyping':
     args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'dataset_csv/tumor_subtyping_dummy_clean.csv',
-                            data_dir= os.path.join(args.data_root_dir, 'tumor_subtyping_resnet_features'),
+    dataset = Generic_MIL_Dataset(csv_path = 'cometFiltered.csv',
+                            data_dir= '/mnt/storage/COMET/preprocessed_test1024_fp/features/',
                             shuffle = False, 
                             print_info = True,
-                            label_dict = {'subtype_1':0, 'subtype_2':1, 'subtype_3':2},
+                            label_dict = {'A_':0, 'E_':1, 'S_':2},
                             patient_strat= False,
                             ignore=[])
 

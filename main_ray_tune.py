@@ -22,6 +22,7 @@ import numpy as np
 
 import ray
 from ray import tune
+from datetime import datetime
 
 try:
     ray.init(address='auto')
@@ -35,10 +36,20 @@ except ConnectionError:
 #  --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/abbas/CLAM/splits/task_2_tumor_subtyping_100/ 
 #  --model_type clam_sb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/ &'
 
+#Short test run
+"""
+CUDA_VISIBLE_DEVICES=0 /home/blansdell/anaconda3/envs/clam/bin/python /home/blansdell/projects/comet/CLAM/main.py \
+ --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 10 --label_frac 1 --k_start 0 --k_end 1 --early_stopping \
+ --exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --weighted_sample --bag_loss ce \
+ --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/abbas/CLAM/splits/task_2_tumor_subtyping_100/ \
+ --model_type clam_sb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/ \
+ --save_activations
+"""
+
 #Base run
 """
 CUDA_VISIBLE_DEVICES=0 /home/blansdell/anaconda3/envs/clam/bin/python /home/blansdell/projects/comet/CLAM/main.py \
- --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 100 --label_frac 1 --k_start 1 --k_end 10 --early_stopping \
+ --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 100 --label_frac 1 --k_start 0 --k_end 1 --early_stopping \
  --exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --weighted_sample --bag_loss ce \
  --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/abbas/CLAM/splits/task_2_tumor_subtyping_100/ \
  --model_type clam_sb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/
@@ -47,7 +58,7 @@ CUDA_VISIBLE_DEVICES=0 /home/blansdell/anaconda3/envs/clam/bin/python /home/blan
 #Ray tune run
 """
 CUDA_VISIBLE_DEVICES=0 /home/blansdell/anaconda3/envs/clam/bin/python /home/blansdell/projects/comet/CLAM/main_ray_tune.py \
- --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 100 --label_frac 1 --k_start 1 --k_end 10 --early_stopping \
+ --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 100 --label_frac 1 --k_start 0 --k_end 10 --early_stopping \
  --exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --weighted_sample --bag_loss ce \
  --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/abbas/CLAM/splits/task_2_tumor_subtyping_100/ \
  --model_type clam_sb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/
@@ -65,7 +76,7 @@ CUDA_VISIBLE_DEVICES=0 python eval.py --drop_out --k 10 --models_exp_code task_2
 
 #Heatmap code
 """
-CUDA_VISIBLE_DEVICES=0,1 python create_heatmaps.py --config config_template.yaml
+CUDA_VISIBLE_DEVICES=0,1 python create_heatmaps.py --config config_comet.yaml
 """
 
 #Questions:
@@ -288,8 +299,6 @@ def train_func(args, cfg):
     args.model_size = cfg['model_size']
     args.drop_out = cfg['drop_out']
     results = main(args)
-
-from datetime import datetime
 
 if __name__ == "__main__":
 

@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from utils.utils import *
 import os
+import pickle 
 from datasets.dataset_generic import save_splits
 from models.model_mil import MIL_fc, MIL_fc_mc
 from models.model_clam import CLAM_MB, CLAM_SB
@@ -198,11 +199,37 @@ def train(datasets, cur, args):
     else:
         torch.save(model.state_dict(), os.path.join(args.results_dir, "s_{}_checkpoint.pt".format(cur)))
 
-    _, val_error, val_auc, _= summary(model, val_loader, args.n_classes)
+    results_dict_train, train_error, train_auc, _= summary(model, train_loader, args.n_classes, save_activations = True)
+    print('Train error: {:.4f}, ROC AUC: {:.4f}'.format(train_error, train_auc))
+
+    results_dict_val, val_error, val_auc, _= summary(model, val_loader, args.n_classes, save_activations = True)
     print('Val error: {:.4f}, ROC AUC: {:.4f}'.format(val_error, val_auc))
 
-    results_dict, test_error, test_auc, acc_logger = summary(model, test_loader, args.n_classes)
+    results_dict, test_error, test_auc, acc_logger = summary(model, test_loader, args.n_classes, save_activations = True)
     print('Test error: {:.4f}, ROC AUC: {:.4f}'.format(test_error, test_auc))
+
+    if args.save_activations:
+        print("Saving activations!")
+        #Make a new directory, if not already one
+        activation_dir = os.path.join(args.results_dir, 'activations')
+        if not os.path.isdir(activation_dir):
+            os.mkdir(activation_dir)
+        #Setup the saving filename
+        fn_activations = os.path.join(activation_dir, 'activations.pkl')
+        def save_activations(results_dict):
+            t_labels = []
+            t_activations = []
+            t_ids = []
+            for s_id in results_dict.keys():
+                t_labels.append(results_dict[s_id]['label'])
+                t_ids.append(s_id)
+                t_activations.append(results_dict[s_id]['activations'].cpu().numpy())
+            return t_ids, t_labels, t_activations
+        assets = {'train': save_activations(results_dict_train), \
+                  'val': save_activations(results_dict_val), \
+                  'test': save_activations(results_dict)}
+        with open(fn_activations, 'wb') as handle:
+            pickle.dump(assets, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     for i in range(args.n_classes):
         acc, correct, count = acc_logger.get_summary(i)
@@ -491,7 +518,7 @@ def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, w
 
     return False
 
-def summary(model, loader, n_classes):
+def summary(model, loader, n_classes, save_activations = False):
     device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
     acc_logger = Accuracy_Logger(n_classes=n_classes)
     model.eval()
@@ -508,14 +535,17 @@ def summary(model, loader, n_classes):
         data, label = data.to(device), label.to(device)
         slide_id = slide_ids.iloc[batch_idx]
         with torch.no_grad():
-            logits, Y_prob, Y_hat, _, _ = model(data)
+            logits, Y_prob, Y_hat, _, results_dict = model(data, return_features = True)
 
         acc_logger.log(Y_hat, label)
         probs = Y_prob.cpu().numpy()
         all_probs[batch_idx] = probs
         all_labels[batch_idx] = label.item()
         
-        patient_results.update({slide_id: {'slide_id': np.array(slide_id), 'prob': probs, 'label': label.item()}})
+        patient_results.update({slide_id: {'slide_id': np.array(slide_id), \
+                            'prob': probs, 'label': label.item()}})
+        if save_activations:
+            patient_results[slide_id]['activations'] = results_dict['features']
         error = calculate_error(Y_hat, label)
         test_error += error
 

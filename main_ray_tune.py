@@ -282,6 +282,11 @@ sweep['drop_out'] = tune.choice([True, False])
 
 def train_func(args, cfg):
     args.lr = cfg['lr']
+    args.reg = cfg['reg']
+    args.bag_loss = cfg['bag_loss']
+    args.model_type = cfg['model_type']
+    args.model_size = cfg['model_size']
+    args.drop_out = cfg['drop_out']
     results = main(args)
 
 from datetime import datetime

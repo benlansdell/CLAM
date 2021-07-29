@@ -215,7 +215,7 @@ def train(datasets, cur, args):
         if not os.path.isdir(activation_dir):
             os.mkdir(activation_dir)
         #Setup the saving filename
-        fn_activations = os.path.join(activation_dir, 'activations.pkl')
+        fn_activations = os.path.join(activation_dir, f'activations_fold_{cur}.pkl')
         def save_activations(results_dict):
             t_labels = []
             t_activations = []

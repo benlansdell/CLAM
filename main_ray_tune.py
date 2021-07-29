@@ -49,10 +49,11 @@ CUDA_VISIBLE_DEVICES=0 /home/blansdell/anaconda3/envs/clam/bin/python /home/blan
 #Base run
 """
 CUDA_VISIBLE_DEVICES=0 /home/blansdell/anaconda3/envs/clam/bin/python /home/blansdell/projects/comet/CLAM/main.py \
- --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 100 --label_frac 1 --k_start 0 --k_end 1 --early_stopping \
+ --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 100 --label_frac 1 --k_start 0 --k_end 10 --early_stopping \
  --exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --weighted_sample --bag_loss ce \
  --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/abbas/CLAM/splits/task_2_tumor_subtyping_100/ \
- --model_type clam_sb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/
+ --model_type clam_sb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/ \
+ --save_activations
 """
 
 #Ray tune run

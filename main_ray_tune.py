@@ -178,6 +178,8 @@ parser.add_argument('--label_frac', type=float, default=1.0,
                     help='fraction of training labels (default: 1.0)')
 parser.add_argument('--reg', type=float, default=1e-5,
                     help='weight decay (default: 1e-5)')
+parser.add_argument('--save_activations', default=False,
+                    action = 'store_true', help = 'Whether to save activations at end of training (default: False)')
 parser.add_argument('--seed', type=int, default=1, 
                     help='random seed for reproducible experiment (default: 1)')
 parser.add_argument('--k', type=int, default=10, help='number of folds (default: 10)')

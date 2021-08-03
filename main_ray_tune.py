@@ -24,8 +24,12 @@ import ray
 from ray import tune
 from datetime import datetime
 
+from cnvrgcallback import CNVRGCallback
+import cnvrg
+
 try:
-    ray.init(address='auto')
+    #ray.init(address='auto')
+    ray.init(address="localhost:6379",ignore_reinit_error=True,log_to_driver=False)
 except ConnectionError:
     print("Couldn't find a ray head node to connect to. Starting a local node")
     ray.init()
@@ -35,6 +39,41 @@ except ConnectionError:
 #  --exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --weighted_sample --bag_loss ce 
 #  --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/abbas/CLAM/splits/task_2_tumor_subtyping_100/ 
 #  --model_type clam_sb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/ &'
+
+#To install on cnvrg:
+# tensorboardX
+# topk:
+#  git clone https://github.com/oval-group/smooth-topk.git
+#  cd smooth-topk
+#  python setup.py install
+# specific version of pytorch: 
+# * pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+# ray[tune]
+# cnvrg 
+
+#Update main.py and main_ray_tune.py with path for features...
+
+#CNVRG test run
+"""
+python main.py \
+ --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 10 --label_frac 1 --k_start 0 --k_end 1 --early_stopping \
+ --exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --weighted_sample --bag_loss ce \
+ --inst_loss svm --task task_2_tumor_subtyping \
+ --model_type clam_sb --log_data --subtyping \
+ --save_activations \
+ --split_dir /data/comet_rms/task_2_tumor_subtyping_100/ \
+ --data_root_dir /data/comet_rms/preprocessed_test1024_fp/features/
+"""
+# --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/
+
+#cnvrg main run
+"""
+python main_ray_tune.py \
+ --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 100 --label_frac 1 --k_start 0 --k_end 10 --early_stopping \
+ --exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --weighted_sample --bag_loss ce \
+ --inst_loss svm --task task_2_tumor_subtyping --split_dir /cnvrg/splits/task_2_tumor_subtyping_100 \
+ --model_type clam_sb --log_data --subtyping --data_root_dir /data/comet_rms/preprocessed_test1024_fp/features/
+ """
 
 #Short test run
 """
@@ -77,7 +116,7 @@ CUDA_VISIBLE_DEVICES=0 python eval.py --drop_out --k 10 --models_exp_code task_2
 
 #Heatmap code
 """
-CUDA_VISIBLE_DEVICES=0,1 python create_heatmaps.py --config config_comet.yaml
+CUDA_VISIBLE_DEVICES=0,1 python create_heatmaps.py --config config_comet_1024_CLAM_100_s1.yaml
 """
 
 #Questions:
@@ -101,8 +140,8 @@ def main(args):
 
     if args.split_dir is None:
         args.split_dir = os.path.join('splits', args.task+'_{}'.format(int(args.label_frac*100)))
-    else:
-        args.split_dir = os.path.join('splits', args.split_dir)
+    #else:
+    #    args.split_dir = os.path.join('splits', args.split_dir)
 
     print('split_dir: ', args.split_dir)
     assert os.path.isdir(args.split_dir)
@@ -303,6 +342,8 @@ def train_func(args, cfg):
     args.drop_out = cfg['drop_out']
     results = main(args)
 
+tracked_metrics = ['val_auc', 'val_err']
+
 if __name__ == "__main__":
 
     sweep_name = 'baseline_sweep'
@@ -315,7 +356,8 @@ if __name__ == "__main__":
         config = sweep,
         num_samples = n_samples,
         resources_per_trial={"cpu": 4, "gpu": 1},
-        max_failures = 2)
+        max_failures = 2,
+        callbacks=[CNVRGCallback(tracked_metrics)])
 
     print("Best config: ", analysis.get_best_config(metric="val_auc", mode="max"))
 

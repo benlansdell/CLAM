@@ -40,17 +40,6 @@ except ConnectionError:
 #  --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/abbas/CLAM/splits/task_2_tumor_subtyping_100/ 
 #  --model_type clam_sb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/ &'
 
-#To install on cnvrg:
-# tensorboardX
-# topk:
-#  git clone https://github.com/oval-group/smooth-topk.git
-#  cd smooth-topk
-#  python setup.py install
-# specific version of pytorch: 
-# * pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
-# ray[tune]
-# cnvrg 
-
 #Update main.py and main_ray_tune.py with path for features...
 
 #CNVRG test run
@@ -355,7 +344,7 @@ if __name__ == "__main__":
         name = name,
         config = sweep,
         num_samples = n_samples,
-        resources_per_trial={"cpu": 4, "gpu": 1},
+        resources_per_trial={"cpu": 1, "gpu": 1},
         max_failures = 2,
         callbacks=[CNVRGCallback(tracked_metrics)])
 

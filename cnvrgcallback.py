@@ -1,6 +1,6 @@
 from ray.tune.logger import LoggerCallback
 from cnvrg import Experiment as CNVRGExperiment
-
+import os
 
 class CNVRGCallback(LoggerCallback):
     

@@ -27,6 +27,8 @@ from datetime import datetime
 from cnvrgcallback import CNVRGCallback
 import cnvrg
 
+from topk import SmoothTop1SVM
+
 try:
     #ray.init(address='auto')
     ray.init(address="localhost:6379",ignore_reinit_error=True,log_to_driver=False)

@@ -45,13 +45,14 @@ except ConnectionError:
 #Update main.py and main_ray_tune.py with path for features...
 
 """
-pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html 
+pip3 install torch==1.9.1+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html 
+pip install ray[default]
+pip install ray[tune]
+
 git clone https://github.com/oval-group/smooth-topk.git
 cd smooth-topk
 pip install -e .
 cd ..
-pip install ray[default]
-pip install ray[tune]
 """
 
 #CNVRG test run

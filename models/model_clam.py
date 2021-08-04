@@ -107,10 +107,10 @@ class CLAM_SB(nn.Module):
     
     @staticmethod
     def create_positive_targets(length, device):
-        return torch.full((length, ), 1, device=device).long()
+        return torch.full((length, ), 1.0, device=device).long()
     @staticmethod
     def create_negative_targets(length, device):
-        return torch.full((length, ), 0, device=device).long()
+        return torch.full((length, ), 0.0, device=device).long()
     
     #instance-level evaluation for in-the-class attention branch
     def inst_eval(self, A, h, classifier): 

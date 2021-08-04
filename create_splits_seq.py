@@ -32,7 +32,7 @@ if args.task == 'task_1_tumor_vs_normal':
 
 elif args.task == 'task_2_tumor_subtyping':
     args.n_classes=3
-    dataset = Generic_WSI_Classification_Dataset(csv_path = 'cometFilteredSubset.csv',
+    dataset = Generic_WSI_Classification_Dataset(csv_path = 'cometFiltered.csv',
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,

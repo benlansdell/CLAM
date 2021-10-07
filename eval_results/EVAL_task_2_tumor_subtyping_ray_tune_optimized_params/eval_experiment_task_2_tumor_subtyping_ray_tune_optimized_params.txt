@@ -1,0 +1,1 @@
+{'task': 'task_2_tumor_subtyping', 'split': 'test', 'save_dir': './eval_results/EVAL_task_2_tumor_subtyping_ray_tune_optimized_params', 'models_dir': '/home/blansdell/projects/comet/CLAM/results/task_2_tumor_subtyping_ray_tune_optimized_params_s1', 'model_type': 'clam_mb', 'drop_out': True, 'model_size': 'small'}

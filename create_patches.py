@@ -221,6 +221,10 @@ parser.add_argument('--custom_downsample', type= int, choices=[1,2], default=1,
 parser.add_argument('--process_list',  type = str, default=None,
 					help='name of list of images to process with parameters (.csv)')
 
+#Example:
+#python create_patches.py --source /mnt/storage/COMET/RAW_testsubset --step_size 1024 --patch_size 1024 --save_dir /mnt/storage/COMET/preprocessed_1024_singleslide --seg --patch --stitch 
+
+
 if __name__ == '__main__':
 	args = parser.parse_args()
 

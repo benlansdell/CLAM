@@ -90,6 +90,10 @@ def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_d
 		print("\n\nprogress: {:.2f}, {}/{}".format(i/total, i, total))
 		print('processing {}'.format(slide))
 		
+		print('Slide ID', slide)
+		if slide == '6192_.svs':
+			print("breaking")
+
 		df.loc[idx, 'process'] = 0
 		slide_id, _ = os.path.splitext(slide)
 
@@ -275,6 +279,8 @@ if __name__ == '__main__':
 	seg_params = {'seg_level': -1, 'sthresh': 8, 'mthresh': 7, 'close': 4, 'use_otsu': False,
 				  'keep_ids': 'none', 'exclude_ids': 'none'}
 	filter_params = {'a_t':100, 'a_h': 16, 'max_n_holes':8}
+	#Change the default from 100 to something else:
+	#filter_params = {'a_t':50, 'a_h': 16, 'max_n_holes':8}
 	vis_params = {'vis_level': -1, 'line_thickness': 250}
 	patch_params = {'use_padding': True, 'contour_fn': 'four_pt'}
 

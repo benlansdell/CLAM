@@ -35,6 +35,11 @@ except ConnectionError:
     print("Couldn't find a ray head node to connect to. Starting a local node")
     ray.init()
 
+#Create patches
+"""
+python create_patches.py --source /mnt/storage/COMET/RAW/batch2 --step_size 1024 --patch_size 1024 --save_dir /home/blansdel/projects/comet/CLAM/processed_data/preprocessed_1024 --seg --patch --stitch
+"""
+
 #CUDA_VISIBLE_DEVICES=NNN /home/abbas/anaconda3/envs/clam/bin/python /home/abbas/CLAM/main.py
 #  --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 200 --label_frac 1 --k_start SSS --k_end EEE 
 #  --exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --weighted_sample --bag_loss ce 
@@ -51,12 +56,29 @@ CUDA_VISIBLE_DEVICES=0 /home/blansdell/anaconda3/envs/clam/bin/python /home/blan
  --save_activations
 """
 
+#{'lr': 0.0023109348472239197, 
+# 'reg': 6.856358714236164e-05, 
+# 'bag_loss': 'svm', 
+# 'model_type': 'clam_mb',
+# 'model_size': 'small',
+# 'drop_out': True}
+
+#Ray tune optimized parameters run
+"""
+CUDA_VISIBLE_DEVICES=0 /home/blansdell/anaconda3/envs/clam/bin/python /home/blansdell/projects/comet/CLAM/main.py \
+ --drop_out --lr 2.3e-3 --reg 6.9e-5 --k 10 --max_epochs 150 --label_frac 1 --k_start 0 --k_end 10 --early_stopping \
+ --exp_code task_2_tumor_subtyping_ray_tune_optimized_params --weighted_sample --bag_loss svm \
+ --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/blansdell/projects/comet/CLAM/splits/task_2_tumor_subtyping_100/ \
+ --model_type clam_mb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/ \
+ --save_activations --model_size small --drop_out
+"""
+
 #Base run
 """
 CUDA_VISIBLE_DEVICES=0 /home/blansdell/anaconda3/envs/clam/bin/python /home/blansdell/projects/comet/CLAM/main.py \
  --drop_out --lr 1e-4 --reg 1e-4 --k 10 --max_epochs 100 --label_frac 1 --k_start 0 --k_end 10 --early_stopping \
  --exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --weighted_sample --bag_loss ce \
- --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/abbas/CLAM/splits/task_2_tumor_subtyping_100/ \
+ --inst_loss svm --task task_2_tumor_subtyping --split_dir /home/blansdell/projects/comet/CLAM/splits/task_2_tumor_subtyping_100/ \
  --model_type clam_sb --log_data --subtyping --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/ \
  --save_activations
 """
@@ -77,17 +99,17 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 /home/blansdell/anaconda3/envs/clam/bin/python /hom
 
 #Evaluation code
 """
-CUDA_VISIBLE_DEVICES=0 python eval.py --drop_out --k 10 --models_exp_code task_2_tumor_subtyping_CLAM_50_s1 \
-                                      --save_exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100 --task task_2_tumor_subtyping \
-                                      --models_exp_code task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100_s1 --model_type clam_sb \
+CUDA_VISIBLE_DEVICES=0 python eval.py --drop_out --k 10 --models_exp_code task_2_tumor_subtyping_ray_tune_optimized_params_s1 \
+                                      --save_exp_code task_2_tumor_subtyping_ray_tune_optimized_params --task task_2_tumor_subtyping \
+                                      --model_type clam_mb \
                                       --results_dir ~/projects/comet/CLAM/results \
                                       --data_root_dir /mnt/storage/COMET/preprocessed_test1024_fp/features/ \
-                                      --splits_dir /home/abbas/CLAM/splits/task_2_tumor_subtyping_100/
+                                      --splits_dir /home/blansdell/projects/comet/CLAM/splits/task_2_tumor_subtyping_100/
 """
 
 #Heatmap code
 """
-CUDA_VISIBLE_DEVICES=0,1 python create_heatmaps.py --config config_comet_1024_CLAM_100_s1.yaml
+CUDA_VISIBLE_DEVICES=0,1 python create_heatmaps.py --config config_comet_1024_ray_tune_optimized_s1.yaml
 """
 
 #Questions:
@@ -327,8 +349,7 @@ if __name__ == "__main__":
         config = sweep,
         num_samples = n_samples,
         resources_per_trial={"cpu": 1, "gpu": 1},
-        max_failures = 2,
-        callbacks=[CNVRGCallback(tracked_metrics)])
+        max_failures = 2)
 
     print("Best config: ", analysis.get_best_config(metric="val_auc", mode="max"))
 

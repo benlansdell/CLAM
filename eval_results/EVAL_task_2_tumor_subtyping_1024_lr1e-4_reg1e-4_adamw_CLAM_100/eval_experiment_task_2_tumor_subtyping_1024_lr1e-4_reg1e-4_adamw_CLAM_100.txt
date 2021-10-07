@@ -1,0 +1,1 @@
+{'task': 'task_2_tumor_subtyping', 'split': 'test', 'save_dir': './eval_results/EVAL_task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100', 'models_dir': '/home/blansdell/projects/comet/CLAM/results/task_2_tumor_subtyping_1024_lr1e-4_reg1e-4_adamw_CLAM_100_s1', 'model_type': 'clam_sb', 'drop_out': True, 'model_size': 'small'}

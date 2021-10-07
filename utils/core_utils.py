@@ -939,8 +939,14 @@ def train(datasets, cur, args):
         acc, correct, count = acc_logger.get_summary(i)
         print('class {}: acc {}, correct {}/{}'.format(i, acc, correct, count))
 
+        if acc is None: acc = 0
         if writer:
             writer.add_scalar('final/test_class_{}_acc'.format(i), acc, 0)
+
+    if val_error is None: val_error = 0
+    if val_auc is None: val_auc = 0
+    if test_error is None: test_error = 0
+    if test_auc is None: test_auc = 0
 
     if writer:
         writer.add_scalar('final/val_error', val_error, 0)

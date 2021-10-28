@@ -85,8 +85,8 @@ if args.task == 'task_1_tumor_vs_normal':
 #Have to update this...
 elif args.task == 'task_2_tumor_subtyping':
     args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'cometFiltered.csv',
-                            data_dir= '/mnt/storage/COMET/preprocessed_test1024_fp/features/',
+    dataset = Generic_MIL_Dataset(csv_path = 'data/comet_annotated_slides_clam.csv',
+                            data_dir= os.path.join(args.data_root_dir, 'features'),
                             shuffle = False, 
                             print_info = True,
                             label_dict = {'A_':0, 'E_':1, 'S_':2},

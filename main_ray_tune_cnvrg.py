@@ -314,8 +314,8 @@ if args.task == 'task_1_tumor_vs_normal':
 
 elif args.task == 'task_2_tumor_subtyping':
     args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'cometFiltered.csv',
-                            data_dir= '/data/comet_rms/preprocessed_test1024_fp/features/',
+    dataset = Generic_MIL_Dataset(csv_path = 'dataset_csv/comet_annotated_slides_clam.csv',
+                            data_dir= '/data/comet_rms/preprocessed_all/features/',
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,

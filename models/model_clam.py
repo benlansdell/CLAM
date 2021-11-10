@@ -79,7 +79,10 @@ class CLAM_SB(nn.Module):
         instance_loss_fn=nn.CrossEntropyLoss(), subtyping=False):
         super(CLAM_SB, self).__init__()
         self.size_dict = {"small": [1024, 512, 256], "big": [1024, 512, 384]}
-        size = self.size_dict[size_arg]
+        if type(size_arg) is int:
+            size = [size_arg, 512, 256]
+        else:
+            size = self.size_dict[size_arg]
         fc = [nn.Linear(size[0], size[1]), nn.ReLU()]
         if dropout:
             fc.append(nn.Dropout(0.25))
@@ -195,7 +198,10 @@ class CLAM_MB(CLAM_SB):
         instance_loss_fn=nn.CrossEntropyLoss(), subtyping=False):
         nn.Module.__init__(self)
         self.size_dict = {"small": [1024, 512, 256], "big": [1024, 512, 384]}
-        size = self.size_dict[size_arg]
+        if type(size_arg) is int:
+            size = [size_arg, 512, 256]
+        else:
+            size = self.size_dict[size_arg]
         fc = [nn.Linear(size[0], size[1]), nn.ReLU()]
         if dropout:
             fc.append(nn.Dropout(0.25))

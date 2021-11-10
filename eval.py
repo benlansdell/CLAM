@@ -42,6 +42,7 @@ parser.add_argument('--micro_average', action='store_true', default=False,
                     help='use micro_average instead of macro_avearge for multiclass AUC')
 parser.add_argument('--split', type=str, choices=['train', 'val', 'test', 'all'], default='test')
 parser.add_argument('--task', type=str, choices=['task_1_tumor_vs_normal',  'task_2_tumor_subtyping'])
+parser.add_argument('--save_activations', default=False, action = 'store_true')
 args = parser.parse_args()
 
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -138,6 +139,27 @@ if __name__ == "__main__":
         all_auc.append(auc)
         all_acc.append(1-test_error)
         df.to_csv(os.path.join(args.save_dir, 'fold_{}.csv'.format(folds[ckpt_idx])), index=False)
+
+        if args.save_activations:
+            print("Saving activations!")
+            #Make a new directory, if not already one
+            activation_dir = os.path.join(args.save_dir, 'activations')
+            if not os.path.isdir(activation_dir):
+                os.mkdir(activation_dir)
+            #Setup the saving filename
+            fn_activations = os.path.join(activation_dir, f'activations_fold_{folds[ckpt_idx]}.pkl')
+            def save_activations(results_dict):
+                t_labels = []
+                t_activations = []
+                t_ids = []
+                for s_id in results_dict.keys():
+                    t_labels.append(results_dict[s_id]['label'])
+                    t_ids.append(s_id)
+                    t_activations.append(results_dict[s_id]['activations'].cpu().numpy())
+                return t_ids, t_labels, t_activations
+            assets = {'all': save_activations(patient_results)}
+            with open(fn_activations, 'wb') as handle:
+                pickle.dump(assets, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     final_df = pd.DataFrame({'folds': folds, 'test_auc': all_auc, 'test_acc': all_acc})
     if len(folds) != args.k:

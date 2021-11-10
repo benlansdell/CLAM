@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import openslide
 from PIL import Image
+from skimage.io import imread
+from skimage.transform import  resize
 import pdb
 import h5py
 import math
@@ -27,7 +29,10 @@ class WholeSlideImage(object):
             path (str): fullpath to WSI file
         """
 
-        self.name = ".".join(path.split("/")[-1].split('.')[:-1])
+        self.name = (".".join(path.split("/")[-1].split('.')[:-1]))
+        #read manual pathologist annotation
+        self.manual_roi_path=path.replace(self.name+".svs","masks/export/"+self.name+".tif")
+        self.manual_roi = (imread(self.manual_roi_path))
         self.wsi = openslide.open_slide(path)
         self.level_downsamples = self._assertLevelDownsamples()
         self.level_dim = self.wsi.level_dimensions
@@ -38,7 +43,9 @@ class WholeSlideImage(object):
 
     def getOpenSlide(self):
         return self.wsi
-
+    #def getManualMask(self):
+    #    manual_roi = imread(self.manual_roi_path)
+    #    return manual_roi
     def initXML(self, xml_path):
         def _createContour(coord_list):
             return np.array([[[int(float(coord.attributes['X'].value)), 
@@ -142,7 +149,15 @@ class WholeSlideImage(object):
             return foreground_contours, hole_contours
         
         img = np.array(self.wsi.read_region((0,0), seg_level, self.level_dim[seg_level]))
-        img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)  # Convert to HSV space
+        manual_roi=self.manual_roi
+        manual_roi[manual_roi!=1]=0
+        manual_roi[manual_roi==1]=255
+        segManual=resize(manual_roi,(img.shape[0],img.shape[1]),anti_aliasing=False)
+        segManual=(segManual>0)*255
+        masked_img=np.copy(img)
+        if np.sum(segManual)>0:
+            masked_img[segManual<100]=255
+        img_hsv = cv2.cvtColor(masked_img, cv2.COLOR_RGB2HSV)  # Convert to HSV space
         img_med = cv2.medianBlur(img_hsv[:,:,1], mthresh)  # Apply median blurring
         
        
@@ -165,6 +180,7 @@ class WholeSlideImage(object):
         
         # Find and filter contours
         contours, hierarchy = cv2.findContours(img_otsu, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE) # Find contours 
+        #print(hierarchy)
         hierarchy = np.squeeze(hierarchy, axis=(0,))[:, 2:]
         if filter_params: foreground_contours, hole_contours = _filter_contours(contours, hierarchy, filter_params)  # Necessary for filtering out artifacts
 

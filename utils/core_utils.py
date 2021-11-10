@@ -832,6 +832,8 @@ def train(datasets, cur, args):
         model_dict.update({'subtyping': True})
     
     if args.model_size is not None and args.model_type != 'mil':
+        #Here we want to detect what the dimension of our feature set is... and 
+        if args.model_size == 'custom': args.model_size = datasets[0][0][0].shape[1]
         model_dict.update({"size_arg": args.model_size})
     
     if args.model_type in ['clam_sb', 'clam_mb']:

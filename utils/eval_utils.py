@@ -46,11 +46,13 @@ def initiate_model(args, ckpt_path):
     return model
 
 def eval(dataset, args, ckpt_path):
+    if args.model_size == 'custom': args.model_size = dataset[0][0].shape[1]
     model = initiate_model(args, ckpt_path)
     
     print('Init Loaders')
     loader = get_simple_loader(dataset)
     patient_results, test_error, auc, df, _ = summary(model, loader, args)
+
     print('test_error: ', test_error)
     print('auc: ', auc)
     return model, patient_results, test_error, auc, df
@@ -71,7 +73,7 @@ def summary(model, loader, args):
         data, label = data.to(device), label.to(device)
         slide_id = slide_ids.iloc[batch_idx]
         with torch.no_grad():
-            logits, Y_prob, Y_hat, _, results_dict = model(data)
+            logits, Y_prob, Y_hat, _, results_dict = model(data, return_features = True)
         
         acc_logger.log(Y_hat, label)
         
@@ -83,6 +85,9 @@ def summary(model, loader, args):
         
         patient_results.update({slide_id: {'slide_id': np.array(slide_id), 'prob': probs, 'label': label.item()}})
         
+        if args.save_activations:
+            patient_results[slide_id]['activations'] = results_dict['features']
+
         error = calculate_error(Y_hat, label)
         test_error += error
 

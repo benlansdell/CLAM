@@ -97,7 +97,7 @@ parser.add_argument('--model_type', type=str, choices=['clam_sb', 'clam_mb', 'mi
                     help='type of model (default: clam_sb, clam w/ single attention branch)')
 parser.add_argument('--exp_code', type=str, help='experiment code for saving results')
 parser.add_argument('--weighted_sample', action='store_true', default=False, help='enable weighted sampling')
-parser.add_argument('--model_size', type=str, choices=['small', 'big'], default='small', help='size of model, does not affect mil')
+parser.add_argument('--model_size', type=str, choices=['small', 'big', 'custom'], default='small', help='size of model, does not affect mil. if custom, then it will be inferred from the feature data provided')
 parser.add_argument('--task', type=str, choices=['task_1_tumor_vs_normal',  'task_2_tumor_subtyping'])
 ### CLAM specific options
 parser.add_argument('--no_inst_cluster', action='store_true', default=False,
@@ -109,6 +109,7 @@ parser.add_argument('--subtyping', action='store_true', default=False,
 parser.add_argument('--bag_weight', type=float, default=0.7,
                     help='clam: weight coefficient for bag-level loss (default: 0.7)')
 parser.add_argument('--B', type=int, default=8, help='numbr of positive/negative patches to sample for clam')
+
 args = parser.parse_args()
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -166,7 +167,7 @@ if args.task == 'task_1_tumor_vs_normal':
 elif args.task == 'task_2_tumor_subtyping':
     print('the path', args.data_root_dir)
     args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'data/comet_annotated_slides_clam.csv',
+    dataset = Generic_MIL_Dataset(csv_path = 'comet_rms/comet_annotated_slides_clam.csv',
                             data_dir= os.path.join(args.data_root_dir, 'features'),
                             shuffle = False, 
                             seed = args.seed, 

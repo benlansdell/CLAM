@@ -9,7 +9,10 @@ class MIL_fc(nn.Module):
         super(MIL_fc, self).__init__()
         assert n_classes == 2
         self.size_dict = {"small": [1024, 512]}
-        size = self.size_dict[size_arg]
+        if type(size_arg) is int:
+            size = [size_arg, 512]
+        else:
+            size = self.size_dict[size_arg]
         fc = [nn.Linear(size[0], size[1]), nn.ReLU()]
         if dropout:
             fc.append(nn.Dropout(0.25))
@@ -48,7 +51,10 @@ class MIL_fc_mc(nn.Module):
         super(MIL_fc_mc, self).__init__()
         assert n_classes > 2
         self.size_dict = {"small": [1024, 512]}
-        size = self.size_dict[size_arg]
+        if type(size_arg) is int:
+            size = [size_arg, 512]
+        else:
+            size = self.size_dict[size_arg]
         fc = [nn.Linear(size[0], size[1]), nn.ReLU()]
         if dropout:
             fc.append(nn.Dropout(0.25))

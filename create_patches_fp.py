@@ -52,7 +52,7 @@ def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_d
 				  use_default_params = False, 
 				  seg = False, save_mask = True, 
 				  stitch= False, 
-				  patch = False, auto_skip=True, process_list = None):
+				  patch = False, auto_skip=True, process_list = None, pathologist_annotation_only = False):
 	
 
 
@@ -141,6 +141,8 @@ def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_d
 
 			for key in patch_params.keys():
 				current_patch_params.update({key: df.loc[idx, key]})
+
+		current_seg_params['pathologist_annotation_only'] = pathologist_annotation_only
 
 		if current_vis_params['vis_level'] < 0:
 			if len(WSI_object.level_dim) == 1:
@@ -246,6 +248,9 @@ parser.add_argument('--patch_level', type=int, default=0,
 					help='downsample level at which to patch')
 parser.add_argument('--process_list',  type = str, default=None,
 					help='name of list of images to process with parameters (.csv)')
+parser.add_argument('--pathologist_annotation_only', type = bool, default=False, action = 'store_true',
+					help='whether to mask out non-tumor regions as annotated by pathologist')
+
 
 if __name__ == '__main__':
 	args = parser.parse_args()
@@ -310,4 +315,5 @@ if __name__ == '__main__':
 											seg = args.seg,  use_default_params=False, save_mask = True, 
 											stitch= args.stitch,
 											patch_level=args.patch_level, patch = args.patch,
-											process_list = process_list, auto_skip=args.no_auto_skip)
+											process_list = process_list, auto_skip=args.no_auto_skip, 
+											pathologst_annotation_only = args.pathologist_annotation_only)

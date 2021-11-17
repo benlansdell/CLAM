@@ -23,6 +23,44 @@ from vis_utils.heatmap_utils import initialize_wsi, drawHeatmap, compute_from_pa
 from wsi_core.wsi_utils import sample_rois
 from utils.file_utils import save_hdf5
 
+from sklearn.preprocessing import StandardScaler
+#Hard code this....
+input_methylation_features_path = "/home/blansdell/projects/comet/comet_rms/methylation_autoencoder_features.csv"
+n_methyl_features = 671
+label_mapping = {'A_':0, 'E_':1, 'S_':2}
+
+def prepare_methylation_features(methylation_path, use_xiang_folds = False):
+
+    methylation_features = pd.read_csv(methylation_path, index_col = 0)
+    methylation_features_ = methylation_features.iloc[:,1:-12].to_numpy()
+    methylation_labels = methylation_features['label']
+    methylation_labels = [label_mapping[i] for i in methylation_labels]
+    methylation_folds = methylation_features.iloc[:,-12:-2].to_numpy()
+
+    methylation_test_labels = None
+    methylation_test_features_ = None
+    test_rows = np.sum(methylation_folds, axis = 1) == 0
+
+    if not use_xiang_folds:
+        methylation_folds = None
+
+    return_vals = {
+        'data': methylation_features,
+        'features': methylation_features_, 
+        'methyl_names': methylation_features['850k_tumor_file_name'],
+        'labels': methylation_labels, 
+        'folds': methylation_folds,
+        'test_labels': methylation_test_labels,
+        'test_features': methylation_test_features_,
+        'test_rows': test_rows
+    }
+
+    return return_vals
+
+#Read in all methylation features
+meth_data = prepare_methylation_features(input_methylation_features_path)['data']
+meth_data.iloc[:,1:(1+n_methyl_features)] = StandardScaler().fit_transform(meth_data.iloc[:,1:(1+n_methyl_features)])
+
 parser = argparse.ArgumentParser(description='Heatmap inference script')
 parser.add_argument('--save_exp_code', type=str, default=None,
 					help='experiment code')
@@ -291,7 +329,7 @@ if __name__ == '__main__':
 											feature_extractor=feature_extractor, 
 											batch_size=exp_args.batch_size, **blocky_wsi_kwargs, 
 											attn_save_path=None, feat_save_path=h5_path, 
-											ref_scores=None)				
+											ref_scores=None)
 		
 		##### check if pt_features_file exists ######
 		if not os.path.isfile(features_path):
@@ -302,6 +340,17 @@ if __name__ == '__main__':
 
 		# load features 
 		features = torch.load(features_path)
+		try:
+			meth_features = np.atleast_2d(meth_data.loc[meth_data['slide_id'] == int(slide_id.replace('_', ''))].iloc[0,1:672].to_numpy().astype(float))
+		except:
+			print(f"Couldn't bring up methylation data for slide {slide_id}, continuing")
+			continue
+
+		#Concat w methylation features:
+		meth_features = np.tile(meth_features, (len(features), 1))
+		features = torch.hstack([features, torch.tensor(meth_features, dtype = torch.float32)])
+
+		print("Size of features is:", features.shape)
 		process_stack.loc[i, 'bag_size'] = len(features)
 		
 		wsi_object.saveSegmentation(mask_file)

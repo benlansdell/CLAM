@@ -347,8 +347,8 @@ if __name__ == '__main__':
 			continue
 
 		#Concat w methylation features:
-		meth_features = np.tile(meth_features, (len(features), 1))
-		features = torch.hstack([features, torch.tensor(meth_features, dtype = torch.float32)])
+		meth_features_ = np.tile(meth_features, (len(features), 1))
+		features = torch.hstack([features, torch.tensor(meth_features_, dtype = torch.float32)])
 
 		print("Size of features is:", features.shape)
 		process_stack.loc[i, 'bag_size'] = len(features)
@@ -418,7 +418,7 @@ if __name__ == '__main__':
 		
 		if heatmap_args.calc_heatmap:
 			compute_from_patches(wsi_object=wsi_object, clam_pred=Y_hats[0], model=model, feature_extractor=feature_extractor, batch_size=exp_args.batch_size, **wsi_kwargs, 
-								attn_save_path=save_path,  ref_scores=ref_scores)
+								attn_save_path=save_path,  ref_scores=ref_scores, meth_features = meth_features)
 
 		if not os.path.isfile(save_path):
 			print('heatmap {} not found'.format(save_path))

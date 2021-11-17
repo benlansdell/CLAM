@@ -46,7 +46,7 @@ def initialize_wsi(wsi_path, seg_mask_path=None, seg_params=None, filter_params=
     return wsi_object
 
 def compute_from_patches(wsi_object, clam_pred=None, model=None, feature_extractor=None, batch_size=512,  
-    attn_save_path=None, ref_scores=None, feat_save_path=None, **wsi_kwargs):    
+    attn_save_path=None, ref_scores=None, feat_save_path=None, meth_features = False, **wsi_kwargs):    
     top_left = wsi_kwargs['top_left']
     bot_right = wsi_kwargs['bot_right']
     patch_size = wsi_kwargs['patch_size']
@@ -63,6 +63,11 @@ def compute_from_patches(wsi_object, clam_pred=None, model=None, feature_extract
         
         with torch.no_grad():
             features = feature_extractor(roi)
+
+            #If we augment features...do it here, I guess
+            if meth_features is not None:
+                meth_features_ = np.tile(meth_features, (len(features), 1))
+                features = torch.hstack([features, torch.tensor(meth_features_, dtype = torch.float32).to(device)])
 
             if attn_save_path is not None:
                 A = model(features, attention_only=True)

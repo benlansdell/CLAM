@@ -45,7 +45,7 @@ def main(args):
                 csv_path='{}/splits_{}.csv'.format(args.split_dir, i))
         
         datasets = (train_dataset, val_dataset, test_dataset)
-        results, test_auc, val_auc, test_acc, val_acc  = train(datasets, i, args)
+        results, test_auc, val_auc, test_acc, val_acc, results_dict_train  = train(datasets, i, args)
         all_test_auc.append(test_auc)
         all_val_auc.append(val_auc)
         all_test_acc.append(test_acc)
@@ -53,6 +53,10 @@ def main(args):
         #write results to pkl
         filename = os.path.join(args.results_dir, 'split_{}_results.pkl'.format(i))
         save_pkl(filename, results)
+        filename = os.path.join(args.results_dir, 'split_{}_results_train.pkl'.format(i))
+        save_pkl(filename, results_dict_train)
+
+
 
     final_df = pd.DataFrame({'folds': folds, 'test_auc': all_test_auc, 
         'val_auc': all_val_auc, 'test_acc': all_test_acc, 'val_acc' : all_val_acc})
@@ -109,6 +113,8 @@ parser.add_argument('--subtyping', action='store_true', default=False,
 parser.add_argument('--bag_weight', type=float, default=0.7,
                     help='clam: weight coefficient for bag-level loss (default: 0.7)')
 parser.add_argument('--B', type=int, default=8, help='numbr of positive/negative patches to sample for clam')
+parser.add_argument('--n_classes', type=int, default=3, help='numbr of positive/negative patches to sample for clam')
+parser.add_argument('--slide_file', type = str, default = None)
 
 args = parser.parse_args()
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -166,15 +172,25 @@ if args.task == 'task_1_tumor_vs_normal':
 
 elif args.task == 'task_2_tumor_subtyping':
     print('the path', args.data_root_dir)
-    args.n_classes=3
-    dataset = Generic_MIL_Dataset(csv_path = 'comet_rms/comet_annotated_slides_clam.csv',
+    #args.n_classes=3
+    print("n_classes", args.n_classes)
+    label_dict = {'A_':0, 'E_':1, 'S_':2}
+    if args.n_classes == 2:
+        del label_dict['S_']
+    if args.slide_file is not None:
+        slide_file = args.slide_file 
+    else:
+        slide_file = 'comet_rms/comet_annotated_slides_clam.csv'
+    dataset = Generic_MIL_Dataset(csv_path = slide_file,
                             data_dir= os.path.join(args.data_root_dir, 'features'),
                             shuffle = False, 
                             seed = args.seed, 
                             print_info = True,
-                            label_dict = {'A_':0, 'E_':1, 'S_':2},
+                            label_dict = label_dict,
                             patient_strat= False,
                             ignore=[])
+
+    #'comet_rms/comet_untreated_nospindle_slides_clam.csv'
 
     if args.model_type in ['clam_sb', 'clam_mb']:
         assert args.subtyping 

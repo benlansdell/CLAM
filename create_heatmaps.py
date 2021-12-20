@@ -346,6 +346,7 @@ if __name__ == '__main__':
 			print(f"Couldn't bring up methylation data for slide {slide_id}, continuing")
 			continue
 
+		meth_features = meth_features[:,:671]
 		#Concat w methylation features:
 		meth_features_ = np.tile(meth_features, (len(features), 1))
 		features = torch.hstack([features, torch.tensor(meth_features_, dtype = torch.float32)])

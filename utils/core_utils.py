@@ -831,11 +831,18 @@ def train(datasets, cur, args):
     if args.model_type == 'clam' and args.subtyping:
         model_dict.update({'subtyping': True})
     
-    if args.model_size is not None and args.model_type != 'mil':
+    #Original version commeted out here wouldn't resize if model type is 'mil',
+    #below we remove that...
+    # if args.model_size is not None and args.model_type != 'mil':
+    #     #Here we want to detect what the dimension of our feature set is... and 
+    #     if args.model_size == 'custom': args.model_size = datasets[0][0][0].shape[1]
+    #     model_dict.update({"size_arg": args.model_size})
+    
+    if args.model_size is not None:
         #Here we want to detect what the dimension of our feature set is... and 
         if args.model_size == 'custom': args.model_size = datasets[0][0][0].shape[1]
         model_dict.update({"size_arg": args.model_size})
-    
+
     if args.model_type in ['clam_sb', 'clam_mb']:
         if args.subtyping:
             model_dict.update({'subtyping': True})
@@ -874,6 +881,7 @@ def train(datasets, cur, args):
     
     print('\nInit Loaders...', end=' ')
     train_loader = get_split_loader(train_split, training=True, testing = args.testing, weighted = args.weighted_sample)
+    train_eval_loader = get_split_loader(train_split, testing = args.testing)
     val_loader = get_split_loader(val_split,  testing = args.testing)
     test_loader = get_split_loader(test_split, testing = args.testing)
     print('Done!')
@@ -906,6 +914,7 @@ def train(datasets, cur, args):
         torch.save(model.state_dict(), os.path.join(args.results_dir, "s_{}_checkpoint.pt".format(cur)))
 
     results_dict_train, train_error, train_auc, _= summary(model, train_loader, args.n_classes, save_activations = True)
+    results_dict_train_eval, train_error, train_auc, _= summary(model, train_eval_loader, args.n_classes, save_activations = True)
     print('Train error: {:.4f}, ROC AUC: {:.4f}'.format(train_error, train_auc))
 
     results_dict_val, val_error, val_auc, _= summary(model, val_loader, args.n_classes, save_activations = True)
@@ -957,7 +966,7 @@ def train(datasets, cur, args):
         writer.add_scalar('final/test_auc', test_auc, 0)
     
     writer.close()
-    return results_dict, test_auc, val_auc, 1-test_error, 1-val_error 
+    return results_dict, test_auc, val_auc, 1-test_error, 1-val_error, results_dict_train_eval
 
 
 def train_loop_clam(epoch, model, loader, optimizer, n_classes, bag_weight, writer = None, loss_fn = None):

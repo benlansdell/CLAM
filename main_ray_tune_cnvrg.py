@@ -187,7 +187,7 @@ def main(args):
                 csv_path='{}/splits_{}.csv'.format(args.split_dir, i))
         
         datasets = (train_dataset, val_dataset, test_dataset)
-        results, test_auc, val_auc, test_acc, val_acc  = train(datasets, i, args)
+        results, test_auc, val_auc, test_acc, val_acc, results_dict_train  = train(datasets, i, args)
         all_test_auc.append(test_auc)
         all_val_auc.append(val_auc)
         all_test_acc.append(test_acc)
@@ -197,6 +197,8 @@ def main(args):
         #write results to pkl
         filename = os.path.join(args.results_dir, 'split_{}_results.pkl'.format(i))
         save_pkl(filename, results)
+        filename = os.path.join(args.results_dir, 'split_{}_results_train.pkl'.format(i))
+        save_pkl(filename, results_dict_train)
 
     tune.report(val_auc = np.mean(val_auc))
     tune.report(val_acc = np.mean(val_acc))

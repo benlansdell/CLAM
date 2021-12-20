@@ -28,8 +28,16 @@ class MIL_fc(nn.Module):
 
     def forward(self, h, return_features=False):
         if return_features:
-            h = self.classifier.module[:3](h)
-            logits = self.classifier.module[3](h)
+            # h = self.classifier.module[:3](h)
+            # logits = self.classifier.module[3](h)
+
+            if isinstance(self.classifier, nn.DataParallel):
+                h = self.classifier.module[:3](h)
+                logits = self.classifier.module[3](h)
+            else:
+                h = self.classifier[:3](h)
+                logits = self.classifier[3](h)
+
         else:
             logits  = self.classifier(h) # K x 1
         
